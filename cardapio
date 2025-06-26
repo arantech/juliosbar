@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cardápio - Lanchonete</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Formal Gray -->
+    <!-- Application Structure Plan: A single-page application with three distinct, switchable views: 'Welcome', 'Menu', and 'Order'. The 'Welcome' view acts as the initial entry point, guiding users to the two main tasks. The 'Menu' view uses a tabbed interface to organize content. The 'Order' view provides a clear call-to-action. The application now asynchronously loads menu data from a simulated JSON source upon startup, making content management easier without needing a separate file. -->
+    <!-- Visualization & Content Choices: 1. Menu Items: (Report Info: Lanches/Bebidas list) -> (Goal: Organize/Inform) -> (Viz: Styled Cards in a Grid) -> (Interaction: N/A) -> (Justification: Cards provide clear separation and space for details.) -> (Library: HTML/Tailwind). 2. Main Navigation: (Report Info: Primary Actions) -> (Goal: Navigate) -> (Viz: Large Buttons) -> (Interaction: Click to switch between app views) -> (Justification: Clear, task-oriented entry points for the user.) -> (Library: HTML/Tailwind/JS). -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .view { display: none; }
+        .view.active { display: block; }
+        .fade-in {
+            animation: fadeIn 0.4s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div id="app" class="container mx-auto p-4 md:p-8 max-w-4xl">
+        
+        <header class="text-center mb-10">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900">Nossa Lanchonete</h1>
+            <p class="text-gray-600 mt-2">Cardápio Digital</p>
+        </header>
+
+        <!-- Welcome View -->
+        <section id="welcomeView" class="view active text-center fade-in">
+            <div class="bg-white p-8 rounded-xl shadow-sm border border-gray-200">
+                <h2 class="text-2xl font-bold mb-4">Bem-vindo(a).</h2>
+                <p class="text-gray-600 mb-6">Escolha uma opção para continuar.</p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button onclick="showView('menuView')" class="bg-gray-800 text-white font-bold py-3 px-8 rounded-lg shadow-sm hover:bg-gray-900 transition-colors">
+                        Ver Cardápio
+                    </button>
+                    <button onclick="showView('orderView')" class="bg-gray-600 text-white font-bold py-3 px-8 rounded-lg shadow-sm hover:bg-gray-700 transition-colors">
+                        Fazer Pedido
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Menu View -->
+        <section id="menuView" class="view fade-in">
+             <div class="w-full text-left mb-4">
+                <button onclick="showView('welcomeView')" class="text-gray-700 hover:text-gray-900 font-semibold">‹ Voltar ao Início</button>
+            </div>
+            <div class="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-gray-200">
+                <h2 class="text-3xl font-bold text-center mb-8">Cardápio</h2>
+                <div class="flex justify-center border-b border-gray-200 mb-8">
+                    <button id="lanchesBtn" class="category-btn text-lg font-semibold pb-2 px-4 border-b-2 border-gray-800 text-gray-900">🍔 Lanches</button>
+                    <button id="bebidasBtn" class="category-btn text-lg font-semibold pb-2 px-4 border-b-2 border-transparent text-gray-500 hover:text-gray-800">🥤 Bebidas</button>
+                </div>
+                
+                <div id="itemsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                </div>
+            </div>
+        </section>
+
+        <!-- Order View -->
+        <section id="orderView" class="view fade-in">
+             <div class="w-full text-left mb-4">
+                <button onclick="showView('welcomeView')" class="text-gray-700 hover:text-gray-900 font-semibold">‹ Voltar ao Início</button>
+            </div>
+            <div class="bg-white p-8 rounded-xl shadow-sm border border-gray-200 text-center">
+                <h2 class="text-3xl font-bold mb-4">Fazer seu Pedido</h2>
+                <p class="text-gray-600 mb-6 max-w-md mx-auto">
+                    Clique no botão abaixo para iniciar seu pedido via WhatsApp. Nossa equipe está pronta para atendê-lo.
+                </p>
+                <a href="https://wa.me/5519991954790?text=Ol%C3%A1%2C%20gostaria%20de%20fazer%20um%20pedido!" target="_blank" class="inline-block bg-green-500 text-white font-bold py-3 px-8 rounded-lg shadow-sm hover:bg-green-600 transition-colors">
+                    Iniciar Pedido no WhatsApp
+                </a>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        let menuData = {};
+        let currentView = 'welcomeView';
+        let currentCategory = 'lanches';
+
+        const lanchesBtn = document.getElementById('lanchesBtn');
+        const bebidasBtn = document.getElementById('bebidasBtn');
+        const itemsContainer = document.getElementById('itemsContainer');
+        
+        lanchesBtn.addEventListener('click', () => updateMenuView('lanches'));
+        bebidasBtn.addEventListener('click', () => updateMenuView('bebidas'));
+
+        function showView(viewId) {
+            document.getElementById(currentView).classList.remove('active');
+            const newView = document.getElementById(viewId);
+            newView.classList.add('active');
+            newView.classList.remove('fade-in');
+            void newView.offsetWidth; 
+            newView.classList.add('fade-in');
+            currentView = viewId;
+        }
+
+        function createItemCard(item) {
+            const card = document.createElement('div');
+            card.className = 'bg-white p-5 rounded-lg border border-gray-200';
+            card.innerHTML = `
+                <h4 class="text-xl font-bold text-gray-800">${item.name}</h4>
+                <p class="text-gray-600 my-2 text-sm">${item.description}</p>
+                <p class="text-lg font-semibold text-gray-900 mt-4">R$ ${item.price.toFixed(2).replace('.', ',')}</p>
+            `;
+            return card;
+        }
+
+        function updateMenuView(category) {
+            currentCategory = category;
+
+            const buttons = { lanches: lanchesBtn, bebidas: bebidasBtn };
+            Object.keys(buttons).forEach(key => {
+                buttons[key].classList.remove('border-gray-800', 'text-gray-900');
+                buttons[key].classList.add('border-transparent', 'text-gray-500');
+            });
+
+            const activeBtn = buttons[category];
+            activeBtn.classList.add('border-gray-800', 'text-gray-900');
+            activeBtn.classList.remove('border-transparent', 'text-gray-500');
+
+            itemsContainer.innerHTML = '';
+            if (menuData && menuData[category]) {
+                const items = menuData[category];
+                items.forEach(item => {
+                    const card = createItemCard(item);
+                    itemsContainer.appendChild(card);
+                });
+            }
+        }
+        
+        async function fetchMenuData() {
+            // Este objeto simula um arquivo 'menu.json' externo.
+            // Para atualizar o cardápio, basta editar os dados aqui.
+            const menuJSON = {
+                lanches: [
+                    { name: "X-Burger Clássico", description: "Pão, hambúrguer de 150g, queijo, alface, tomate e molho especial.", price: 25.00 },
+                    { name: "X-Salada Completo", description: "Pão, hambúrguer, queijo, presunto, ovo, bacon, alface e tomate.", price: 30.00 },
+                    { name: "Frango Crispy", description: "Pão, filé de frango crocante, queijo, alface e maionese de ervas.", price: 28.00 }
+                ],
+                bebidas: [
+                    { name: "Coca-Cola (Lata 350ml)", description: "Refrigerante lata 350ml.", price: 6.00 },
+                    { name: "Suco de Laranja Natural", description: "Suco natural 500ml.", price: 9.00 },
+                    { name: "Água Mineral", description: "Garrafa com ou sem gás.", price: 4.00 }
+                ]
+            };
+            
+            // Simula uma requisição de rede para carregar o JSON.
+            // Isso torna o código mais robusto e preparado para o futuro.
+            const response = await fetch('data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(menuJSON)));
+            return await response.json();
+        }
+
+        async function initializeApp() {
+            try {
+                menuData = await fetchMenuData();
+                updateMenuView('lanches');
+                showView('welcomeView');
+            } catch (error) {
+                console.error("Erro ao carregar o cardápio:", error);
+                const appContainer = document.getElementById('app');
+                appContainer.innerHTML = `<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative text-center" role="alert">
+                                            <strong class="font-bold">Erro!</strong>
+                                            <span class="block sm:inline">Não foi possível carregar o cardápio. Tente novamente mais tarde.</span>
+                                          </div>`;
+            }
+        }
+        
+        window.onload = initializeApp;
+    </script>
+</body>
+</html>
